@@ -96,7 +96,7 @@ const App = (() => {
             return true;
         } catch (e) {
             console.error("Critical API Error:", e);
-            throw e;
+            return false;
         }
     }
 
@@ -163,7 +163,7 @@ const App = (() => {
                 saveSession({
                     user,
                     violations: 0,
-                    timeLeft: 3600, // 60 minutes
+                    timeLeft: 3600,
                     completed: [false, false, false],
                     results: ['', '', ''],
                     currentIdx: 0,
@@ -189,14 +189,12 @@ const App = (() => {
                 saveSession({ selectedLanguage: lang });
 
                 if (state.user && state.user.gmail) {
-                    try {
-                        await postData({
-                            action: 'update',
-                            type: 'language',
-                            gmail: state.user.gmail,
-                            value: lang.toUpperCase()
-                        });
-                    } catch (e) { }
+                    await postData({
+                        action: 'update',
+                        type: 'language',
+                        gmail: state.user.gmail,
+                        value: lang.toUpperCase()
+                    });
                 }
                 window.location.href = "instructions.html";
             };
