@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bug Hunt - Editor</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- CodeMirror CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/dracula.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/clike/clike.min.js"></script>
+</head>
+
+<body class="editor-page" oncontextmenu="return false;">
+    <div class="matrix-background"></div>
+
+    <header class="top-bar">
+        <div class="timer-display" id="timerValue">00:00:00</div>
+        <div class="logo-area">
+            <img src="images/event logo.png" alt="Bug Hunt Logo" class="event-logo-small">
+        </div>
+        <div class="violation-area">
+            <div class="violation-badge">Violations: <span id="violationCount">0</span></div>
+        </div>
+    </header>
+
+    <div class="container arena-flow">
+        <div class="panel main-panel">
+            <div class="editor-region">
+                <div class="problem-list-panel">
+                    <div class="panel-inner-header">
+                        <h3>PROBLEMS</h3>
+                    </div>
+                    <ul id="problemList" class="problem-list">
+                        <!-- Problems will be injected here -->
+                    </ul>
+                </div>
+
+                <div class="editor-panel">
+                    <div class="panel-inner-header">
+                        <h3 id="problemTitle">Select a Problem</h3>
+                        <div class="problem-meta">
+                            <span id="progressText">Question 1 of 3</span>
+                        </div>
+                    </div>
+
+                    <div class="problem-description">
+                        <p id="problemDesc">Please select a problem from the list to begin.</p>
+                    </div>
+
+                    <div class="editor-container">
+                        <textarea id="codeEditor"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-section">
+                <div class="main-btns">
+                    <button id="runBtn">Run</button>
+                    <button id="submitBtn">Submit Solution</button>
+                </div>
+            </div>
+
+            <div class="output-section">
+                <label>OUTPUT:</label>
+                <div class="output-container">
+                    <textarea id="answer" readonly placeholder="Execution output will appear here..."></textarea>
+                </div>
+            </div>
+
+            <div id="statusMsg" class="status-message"></div>
+        </div>
+    </div>
+
+    <!-- Warning modal -->
+    <div id="warningModal" class="modal">
+        <div class="modal-content card">
+            <h3>⚠️ MALPRACTICE WARNING</h3>
+            <p id="warningText">Violation detected.</p>
+            <button onclick="closeModal()">Back</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

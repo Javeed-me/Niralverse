@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bug Hunt - Sign Up</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="signup-page">
+    <div class="matrix-background"></div>
+
+    <div class="branding-top">
+        <img src="images/event logo.png" alt="Bug Hunt Logo" class="event-logo-large">
+    </div>
+
+    <div class="container center-flow">
+        <div class="card signup-card">
+            <h2>SIGN UP</h2>
+            <form id="signupForm">
+                <div class="field-row">
+                    <label for="name">NAME</label>
+                    <input type="text" id="name" name="name" placeholder="Full Name" required>
+                </div>
+
+                <div class="field-row">
+                    <label for="gmail">GMAIL</label>
+                    <input type="email" id="gmail" name="gmail" placeholder="example@gmail.com" required>
+                </div>
+
+                <div class="field-row">
+                    <label for="teamName">TEAM NAME</label>
+                    <input type="text" id="teamName" name="teamName" placeholder="Team Name" required>
+                </div>
+
+                <div class="field-row">
+                    <label for="collegeName">COLLEGE NAME</label>
+                    <input type="text" id="collegeName" name="collegeName" placeholder="College Name" required>
+                </div>
+
+                <div class="submit-area">
+                    <button type="submit" id="submitBtn">SUBMIT</button>
+                    <div id="statusMsg" class="status-message"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
