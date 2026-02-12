@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bug Hunt - Instructions</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body class="instructions-page" oncontextmenu="return false;">
+    <div class="matrix-background"></div>
+
+    <div class="branding-top">
+        <img src="images/event logo.png" alt="Bug Hunt Logo" class="event-logo-large">
+    </div>
+
+    <div class="container rules-flow">
+        <div class="rules-card card">
+            <h2>CONTEST RULES & INSTRUCTIONS</h2>
+            <div class="rules-content">
+                <div class="rule-item">
+                    <span class="rule-icon">🕒</span>
+                    <div class="rule-text">
+                        <h4>60-Minute Countdown</h4>
+                        <p>You have exactly 60 minutes to complete 3 debugging challenges. The timer starts as soon as
+                            you enter the editor.</p>
+                    </div>
+                </div>
+
+                <div class="rule-item">
+                    <span class="rule-icon">🚫</span>
+                    <div class="rule-text">
+                        <h4>Malpractice Monitoring</h4>
+                        <p>Switching tabs, windows, or minimizing the browser is strictly forbidden. Exceeding 2
+                            violations will result in automatic submission and disqualification.</p>
+                    </div>
+                </div>
+
+                <div class="rule-item">
+                    <span class="rule-icon">🤖</span>
+                    <div class="rule-text">
+                        <h4>No AI or External Tools</h4>
+                        <p>Use of ChatGPT, Copilot, or any AI tool is restricted. We are monitoring all outgoing
+                            requests.</p>
+                    </div>
+                </div>
+
+                <div class="rule-item">
+                    <span class="rule-icon">💻</span>
+                    <div class="rule-text">
+                        <h4>Online Compiler</h4>
+                        <p>Use the integrated "Run" button to test your code. Only the final output of your code will be
+                            considered for evaluation.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="acknowledgement-footer">
+                <label class="check-container">
+                    <input type="checkbox" id="agreeCheck">
+                    <span class="checkmark"></span>
+                    I have read and I agree to follow all the contest rules.
+                </label>
+                <button id="startContestBtn" class="primary-btn" disabled>ENTER ARENA</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

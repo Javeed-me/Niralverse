@@ -156,6 +156,8 @@ body {
 }
 
 .selection-flow h2 {
+    color: var(--accent);
+    text-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
     font-size: 3rem;
     font-weight: 900;
     margin-bottom: 3rem;
@@ -406,12 +408,150 @@ body {
     margin-bottom: 2rem;
 }
 
-.secondary-btn {
-    background: #6b7280;
+/* Instructions Page */
+.rules-flow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    padding: 2rem;
+}
+
+.rules-card {
+    max-width: 700px;
+    width: 100%;
+    background: rgba(17, 24, 39, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1.5rem;
+    padding: 3rem;
+    text-align: center;
+}
+
+.rules-card h2 {
+    color: var(--accent);
+    text-shadow: 0 0 15px rgba(0, 255, 65, 0.4);
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.rules-content {
+    margin: 2rem 0;
+}
+
+.rule-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+}
+
+.rule-icon {
+    font-size: 2rem;
+    margin-right: 1.5rem;
+    background: rgba(139, 92, 246, 0.1);
+    padding: 0.75rem;
+    border-radius: 1rem;
+}
+
+.rule-text h4 {
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.rule-text p {
+    color: #9ca3af;
+    line-height: 1.6;
+}
+
+.acknowledgement-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+/* Custom Checkbox */
+.check-container {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    cursor: pointer;
+    font-size: 1rem;
+    color: #9ca3af;
+    user-select: none;
+}
+
+.check-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 25px;
+    width: 25px;
+    background-color: #2d3748;
+    border-radius: 6px;
+}
+
+.check-container:hover input~.checkmark {
+    background-color: #4a5568;
+}
+
+.check-container input:checked~.checkmark {
+    background-color: var(--primary);
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.check-container input:checked~.checkmark:after {
+    display: block;
+}
+
+.check-container .checkmark:after {
+    left: 9px;
+    top: 5px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 3px 3px 0;
+    transform: rotate(45deg);
+}
+
+.primary-btn {
+    background: var(--primary);
     color: white;
-    padding: 1rem 2rem;
+    padding: 1rem 3rem;
     border-radius: 2rem;
     font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    border: none;
+    transition: 0.3s;
+    box-shadow: 0 4px 15px rgba(148, 0, 255, 0.3);
+}
+
+.primary-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(148, 0, 255, 0.4);
+}
+
+.primary-btn:disabled {
+    background: #4b5563;
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
 }
 
 /* Modal Base */

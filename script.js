@@ -198,9 +198,24 @@ const App = (() => {
                         });
                     } catch (e) { }
                 }
-                window.location.href = "editor.html";
+                window.location.href = "instructions.html";
             };
         });
+    }
+
+    function initInstructions() {
+        const check = document.getElementById('agreeCheck');
+        const btn = document.getElementById('startContestBtn');
+
+        if (check && btn) {
+            check.addEventListener('change', () => {
+                btn.disabled = !check.checked;
+            });
+
+            btn.onclick = () => {
+                window.location.href = "editor.html";
+            };
+        }
     }
 
     function initEnd() {
@@ -414,6 +429,7 @@ const App = (() => {
 
         if (isSignupPage) initSignup();
         if (document.querySelector('.lang-tile')) initLanguage();
+        if (document.querySelector('.instructions-page')) initInstructions();
         if (document.getElementById('editorContainer')) {
             initEditor();
             initSecurity();
