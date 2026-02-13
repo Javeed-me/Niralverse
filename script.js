@@ -2,7 +2,7 @@ const App = (() => {
     /* ==============================
        CONFIG
     ============================== */
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyy2LdAaqrMEgd49EzNwh1cTHAtEpHwmQbO8sD9ZYJawx1DbUBZl0hnvhoSlcuCvr7Rig/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwe-iNZjmDrSyjNsS1TOKmCj8PMY6O7_OA_JSuIMygJwWWFeHOs2PT8N_2lR41lZJod9g/exec';
 
     const PISTON_ENDPOINTS = [
         'https://emkc.org/api/v2/piston/execute',
@@ -86,17 +86,56 @@ const App = (() => {
     /* ==============================
        API HELPERS
     ============================== */
+    /* ==============================
+       UI HELPERS
+    ============================== */
+    function showModal(msg, title = "NOTICE", callback, showClose = true, btnText = "Continue") {
+        const modal = document.getElementById('warningModal');
+        const header = document.getElementById('warningHeader');
+        const text = document.getElementById('warningText');
+        const closeBtn = document.getElementById('closeModalBtn');
+
+        if (!modal || !text) {
+            alert(`${title}\n\n${msg}`);
+            if (callback) callback();
+            return;
+        }
+
+        if (header) header.innerText = title;
+        text.innerText = msg;
+        modal.style.display = 'flex';
+
+        if (closeBtn) {
+            closeBtn.style.display = showClose ? 'block' : 'none';
+            closeBtn.innerText = btnText;
+        }
+
+        window.onModalConfirm = () => {
+            modal.style.display = 'none';
+            if (callback) callback();
+        };
+    }
+
+    function showLoading(show) {
+        const loader = document.getElementById('loader');
+        if (loader) loader.style.display = show ? 'flex' : 'none';
+    }
+
     async function postData(data) {
         try {
-            await fetch(SCRIPT_URL, {
+            // Normalize Gmail if present
+            if (data.gmail) data.gmail = data.gmail.toLowerCase().trim();
+
+            const resp = await fetch(SCRIPT_URL, {
                 method: 'POST',
                 body: JSON.stringify(data),
-                mode: 'no-cors'
+                mode: 'cors'
             });
-            return true;
+            const result = await resp.json();
+            return result;
         } catch (e) {
             console.error("Critical API Error:", e);
-            return false;
+            return { result: 'error', message: 'Connection Error: ' + e.toString() };
         }
     }
 
@@ -132,68 +171,76 @@ const App = (() => {
     function initSignup() {
         const form = document.getElementById('signupForm');
         const btn = document.getElementById('submitBtn');
-        const status = document.getElementById('statusMsg');
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const user = Object.fromEntries(new FormData(form).entries());
 
             if (Object.values(user).some(val => !val.trim())) {
-                status.innerText = "All fields are required.";
-                status.style.color = "#ff4d4d";
+                showModal("All fields are required.", "SIGNUP ERROR");
                 return;
             }
 
             const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
             if (!gmailRegex.test(user.gmail)) {
-                status.innerText = "Please use a valid @gmail.com address.";
-                status.style.color = "#ff4d4d";
+                showModal("Please use a valid @gmail.com address.", "SIGNUP ERROR");
                 return;
             }
 
             try {
                 btn.disabled = true;
                 btn.innerText = "SUBMITTING...";
-                status.innerText = "Registering...";
-                status.style.color = "#00ff66";
+                showLoading(true);
 
-                // Clear any old session to enforce fresh 60-min timer
+                // Clear any old session
                 sessionStorage.clear();
 
-                saveSession({
-                    user,
-                    violations: 0,
-                    timeLeft: 3600,
-                    completed: [false, false, false],
-                    results: ['', '', ''],
-                    currentIdx: 0,
-                    finished: false
-                });
+                const response = await postData({ action: 'signup', ...user });
 
-                await postData({ action: 'signup', ...user });
-                window.location.href = "language.html";
+                if (response.result === 'success') {
+                    saveSession({
+                        user,
+                        violations: 0,
+                        timeLeft: 3600,
+                        completed: [false, false, false],
+                        results: ['', '', ''],
+                        currentIdx: 0,
+                        finished: false
+                    });
+                    window.location.href = "language.html";
+                } else {
+                    showModal(response.message || "Registration failed.", "SIGNUP ERROR");
+                    btn.disabled = false;
+                    btn.innerText = "SUBMIT";
+                }
             } catch (err) {
-                status.innerText = "Submission failed.";
-                status.style.color = "#ff4d4d";
+                showModal("Submission failed. Check connection.", "SIGNUP ERROR");
                 btn.disabled = false;
                 btn.innerText = "SUBMIT";
+            } finally {
+                showLoading(false);
             }
         });
     }
 
     function initLanguage() {
+        // Preload Monaco Editor to save time later
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.1/min/vs/loader.min.js';
+        document.head.appendChild(script);
+
         document.querySelectorAll('.lang-tile').forEach(tile => {
             tile.onclick = async () => {
                 const lang = tile.dataset.lang;
                 const state = getSession();
                 saveSession({ selectedLanguage: lang });
 
+                showLoading(true);
                 if (state.user && state.user.gmail) {
                     await postData({
-                        action: 'update',
-                        type: 'language',
+                        action: 'sync',
                         gmail: state.user.gmail,
-                        value: lang.toUpperCase()
+                        language: lang
                     });
                 }
                 window.location.href = "instructions.html";
@@ -223,13 +270,13 @@ const App = (() => {
     function initSecurity() {
         const state = getSession();
         let violations = state.violations || 0;
-
-        // Default to 60 minutes if not found in state
         let timeLeft = (state.timeLeft !== undefined && state.timeLeft !== null) ? state.timeLeft : 3600;
 
         const timerEl = document.getElementById('timerValue');
         const violationEl = document.getElementById('violationCount');
         if (violationEl) violationEl.innerText = violations;
+
+        let isTerminating = false;
 
         const formatTime = (s) => {
             const h = Math.floor(s / 3600);
@@ -240,23 +287,33 @@ const App = (() => {
 
         if (timerEl) timerEl.innerText = formatTime(timeLeft);
 
+        // Navigation Locking
+        history.pushState(null, null, location.href);
+        window.onpopstate = () => {
+            history.pushState(null, null, location.href);
+            showModal("Back navigation is disabled during the contest.", "NAVIGATION LOCKED");
+        };
+
         async function autoSubmitAll(reason = "") {
+            if (isTerminating) return;
+            isTerminating = true;
+
+            showLoading(true);
             const session = getSession();
-            if (session.results && session.completed) {
-                for (let i = 0; i < session.results.length; i++) {
-                    if (session.completed[i]) {
-                        await postData({
-                            action: 'update',
-                            type: 'answer',
-                            gmail: session.user.gmail,
-                            problemIndex: i,
-                            value: session.results[i]
-                        });
-                    }
-                }
+            if (session.user && session.user.gmail) {
+                // Atomic sync of ALL current data
+                await postData({
+                    action: 'sync',
+                    gmail: session.user.gmail,
+                    language: session.selectedLanguage,
+                    results: session.results
+                });
             }
-            alert(`Session ended: ${reason}`);
-            window.location.href = "end.html";
+            showLoading(false);
+
+            showModal(`Violations breached. Auto-submitting. Reason: ${reason}`, "SESSION TERMINATED", () => {
+                window.location.href = "end.html";
+            }, true, "OK");
         }
 
         const timerInterval = setInterval(() => {
@@ -270,23 +327,42 @@ const App = (() => {
             if (timeLeft % 5 === 0) saveSession({ timeLeft });
         }, 1000);
 
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
+        let lastViolationTime = 0;
+        const VIOLATION_COOLDOWN = 1000; // 1 second ignore window
+
+        const handleViolation = (msg) => {
+            const now = Date.now();
+            if (now - lastViolationTime < VIOLATION_COOLDOWN) return; // Prevent double-counting ghost signals
+
+            if (!isTerminating) {
+                lastViolationTime = now;
                 violations++;
                 saveSession({ violations });
                 if (violationEl) violationEl.innerText = violations;
 
-                if (violations > 2) {
+                if (violations > 3) {
                     autoSubmitAll("Violation Limit Reached.");
                 } else {
-                    const modal = document.getElementById('warningModal');
-                    if (modal) {
-                        document.getElementById('warningText').innerText = `Tab switching is forbidden! (${violations}/3)`;
-                        modal.style.display = 'flex';
-                    }
+                    showModal(`${msg} (${violations}/3)`, "⚠️ MALPRACTICE WARNING");
                 }
             }
-        });
+        };
+
+        const startMonitoring = () => {
+            // Window/App Switching Detection
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) handleViolation("Tab/Window switching detected!");
+            });
+
+            window.addEventListener('blur', () => {
+                handleViolation("Application focus lost!");
+            });
+        };
+
+        // Start Monitoring immediately if in editor
+        if (document.getElementById('editorContainer')) {
+            startMonitoring();
+        }
 
         window.closeModal = () => {
             const modal = document.getElementById('warningModal');
@@ -384,23 +460,33 @@ const App = (() => {
 
             document.getElementById("submitBtn").onclick = async () => {
                 const out = document.getElementById("answer").value;
-                if (!out || out === "Executing...") return alert("Run first.");
+                if (!out || out === "Executing..." || out.includes("Connection Error") || out.includes("ERROR")) {
+                    return showModal("Please run your code successfully before submitting.", "SUBMISSION ERROR");
+                }
+
                 const confirmed = await confirmSubmission();
                 if (!confirmed) return;
 
+                showLoading(true);
                 state.completed[currentIdx] = true;
                 state.results[currentIdx] = out;
                 saveSession(state);
 
                 if (state.user && state.user.gmail) {
-                    await postData({
-                        action: 'update',
-                        type: 'answer',
+                    // Atomic sync of ALL current data
+                    const res = await postData({
+                        action: 'sync',
                         gmail: state.user.gmail,
-                        problemIndex: currentIdx,
-                        value: out
+                        language: state.selectedLanguage,
+                        results: state.results
                     });
+                    if (!res || res.result !== 'success') {
+                        showLoading(false);
+                        const msg = res && res.message ? res.message : "Unknown error";
+                        return showModal(`Storage failed. Reason: ${msg}`, "BACKEND ERROR");
+                    }
                 }
+                showLoading(false);
 
                 if (state.completed.every(c => c)) {
                     window.location.href = "end.html";
@@ -420,12 +506,19 @@ const App = (() => {
         const isEndPage = !!document.querySelector('.end-page');
         const isSignupPage = !!document.getElementById('signupForm');
 
-        if (state.finished && !isEndPage && !isSignupPage) {
-            window.location.href = "signup.html";
+        // Hide loader by default on every page load
+        showLoading(false);
+
+        if (state.finished && !isEndPage) {
+            // Force return to end page if contest is already finished
+            window.location.replace("end.html");
             return;
         }
 
-        if (isSignupPage) initSignup();
+        if (isSignupPage) {
+            sessionStorage.clear(); // Ensure fresh start
+            initSignup();
+        }
         if (document.querySelector('.lang-tile')) initLanguage();
         if (document.querySelector('.instructions-page')) initInstructions();
         if (document.getElementById('editorContainer')) {

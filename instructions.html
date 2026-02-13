@@ -37,7 +37,7 @@
                     <span class="rule-icon">🚫</span>
                     <div class="rule-text">
                         <h4>Malpractice Monitoring</h4>
-                        <p>Switching tabs, windows, or minimizing the browser is strictly forbidden. Exceeding 2
+                        <p>Switching tabs, windows, or minimizing the browser is strictly forbidden. Exceeding 3
                             violations will result in automatic submission and disqualification.</p>
                     </div>
                 </div>
@@ -70,6 +70,21 @@
                 <button id="startContestBtn" class="primary-btn" disabled>ENTER ARENA</button>
             </div>
         </div>
+    </div>
+
+    <!-- Warning Modal -->
+    <div id="warningModal" class="modal">
+        <div class="modal-content">
+            <h3 id="warningHeader">Notice</h3>
+            <p id="warningText">Violation detected!</p>
+            <button id="closeModalBtn" class="modal-btn primary" onclick="onModalConfirm()">Continue</button>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loader">
+        <div class="spinner"></div>
+        <p>PROCESSING...</p>
     </div>
 
     <script src="script.js"></script>
