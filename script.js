@@ -266,6 +266,11 @@ const App = (() => {
 
     function initEnd() {
         saveSession({ finished: true });
+        // Lock navigation on end page too
+        history.pushState(null, null, location.href);
+        window.onpopstate = () => {
+            history.pushState(null, null, location.href);
+        };
     }
 
     function initSecurity() {
@@ -289,10 +294,22 @@ const App = (() => {
         if (timerEl) timerEl.innerText = formatTime(timeLeft);
 
         // Navigation Locking
-        history.pushState(null, null, location.href);
+        // Ensure we have an initial state to push against
+        if (!history.state || history.state.bh_locked !== true) {
+            history.pushState({ bh_locked: true }, null, location.href);
+        }
+
         window.onpopstate = () => {
-            history.pushState(null, null, location.href);
+            history.pushState({ bh_locked: true }, null, location.href);
             showModal("Back navigation is disabled during the contest.", "NAVIGATION LOCKED");
+        };
+
+        // Prevent refresh/leaving via standard browser warning
+        window.onbeforeunload = (e) => {
+            if (!isTerminating && !getSession().finished) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
         };
 
         async function autoSubmitAll(reason = "") {
@@ -510,16 +527,23 @@ const App = (() => {
         // Hide loader by default on every page load
         showLoading(false);
 
-        if (state.finished && !isEndPage) {
-            // Force return to end page if contest is already finished
+        // 1. STRICT REDIRECTION: If finished, only allow end page or signup
+        if (state.finished && !isEndPage && !isSignupPage) {
             window.location.replace("end.html");
             return;
         }
 
+        // 2. Initial signup setup
         if (isSignupPage) {
-            sessionStorage.clear(); // Ensure fresh start
+            // Only clear if we are NOT already finished, or if we want to allow re-signup
+            // The user said "it should strictly considered as i can manipulate answers... after submitting and backtracking"
+            // So we allow signup to override 'finished' if they explicitly go to signup.html
+            sessionStorage.clear();
             initSignup();
+            return; // Don't run other inits on signup page
         }
+
+        // 3. Regular Page Inits
         if (document.querySelector('.lang-tile')) initLanguage();
         if (document.querySelector('.instructions-page')) initInstructions();
         if (document.getElementById('editorContainer')) {
