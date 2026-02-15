@@ -102,27 +102,27 @@ No heavy backend required.
 
 Signup
 
-↓
+  ↓
 
 Choose Language
 
-↓
+  ↓
 
 Debug Problems
 
-↓
+  ↓
 
 Run Code
 
-↓
+  ↓
 
 Submit Output
 
-↓
+  ↓
 
 Results Stored
 
-↓
+  ↓
 
 End Screen
 
