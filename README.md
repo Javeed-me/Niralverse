@@ -101,21 +101,27 @@ No heavy backend required.
 ## 🧠 Event Flow
 
 Signup
+
 ↓
 
 Choose Language
+
 ↓
 
 Debug Problems
+
 ↓
 
 Run Code
+
 ↓
 
 Submit Output
+
 ↓
 
 Results Stored
+
 ↓
 
 End Screen
