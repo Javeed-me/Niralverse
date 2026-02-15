@@ -34,12 +34,12 @@ const App = (() => {
             {
                 title: "Roman to Integer",
                 desc: "Convert Roman numeral string to an integer.",
-                code: `class Solution:\n    def romanToInt(self, s: str) -> int:\n        roman = {'I':1,'V':5,'X':10,'L':50,'C':100,'D':500,'M':1000}\n        total = 0\n        for i in range(len(s)):\n            if i+1 < len(s) and roman[s[i]] > roman[s[i+1]]:\n                total -= roman[s[i]]\n            else:\n                total += roman[s[i]]\n        return total`
+                code: `class Solution:\n    def romanToInt(self, s: str) -> int:\n        roman = {'I':1,'V':5,'X':10,'L':50,'C':100,'D':500,'M':1000}\n        total = 0\n        for i in range(len(s)):\n            if i+1 < len(s) and roman[s[i]] > roman[s[i+1]]:\n                total -= roman[s[i]]\n            else:\n                total += roman[s[i]]\n        return total\n\nprint(Solution().romanToInt(\"IV\"))\n`
             },
             {
                 title: "Combination Sum",
                 desc: "Return a list of combinations that sum up to the target.",
-                code: `class Solution:\n    def combinationSum(self, candidates, target):\n        result = []\n        def backtrack(start,path,rem):\n            if rem==0:\n                result.append(list(path))\n                return\n            if rem<0:\n                return\n            for i in range(start,len(candidates)):\n                path.append(candidates[i])\n                backtrack(i+1,path,rem-candidates[i])\n                path.pop()\n        backtrack(0,[],target)\n        return result`
+                code: `class Solution:\n    def combinationSum(self, nums, target):\n        result = []\n\n        def dfs(start, path, rem):\n            if rem == 0:\n                result.append(path[:])\n                return\n            if rem < 0:\n                return\n\n            for i in range(start, len(nums)):\n                path.append(nums[i])\n                dfs(i + 1, path, rem - nums[i])\n                path.pop()\n\n        dfs(0, [], target)\n        return len(result)\n\nprint(Solution().combinationSum([2,3,6,7], 7))\n`
             },
             {
                 title: "Median of Two Arrays",
@@ -51,34 +51,35 @@ const App = (() => {
             {
                 title: "Roman to Integer",
                 desc: "Convert Roman numeral string to an integer.",
-                code: `class Solution {\n    public int romanToInt(String s){\n        java.util.Map<Character,Integer> m = new java.util.HashMap<>();\n        m.put('I',1); m.put('V',5); m.put('X',10);\n        m.put('L',50); m.put('C',100); m.put('D',500); m.put('M',1000);\n        int total = 0;\n        for(int i=0; i<s.length(); i++){\n            if(i+1<s.length() && m.get(s.charAt(i)) < m.get(s.charAt(i+1)))\n                total -= m.get(s.charAt(i));\n            else total += m.get(s.charAt(i));\n        }\n        return total;\n    }\n}`
+                code: `import java.util.*;\n\nclass Main {\n    static int romanToInt(String s){\n        Map<Character,Integer> r=new HashMap<>();\n        r.put('I',1); r.put('V',5); r.put('X',10);\n        r.put('L',50); r.put('C',100); r.put('D',500); r.put('M',1000);\n        int total=0;\n        for(int i=0;i<s.length();i++){\n            if(i+1<s.length() && r.get(s.charAt(i)) > r.get(s.charAt(i+1)))\n                total-=r.get(s.charAt(i));\n            else total+=r.get(s.charAt(i));\n        }\n        return total;\n    }\n    public static void main(String[] args){\n        System.out.println(romanToInt(\"IV\"));\n    }\n}`
             },
             {
                 title: "Combination Sum",
                 desc: "Return combinations that sum up to target.",
-                code: `class Solution{\n    public java.util.List<java.util.List<Integer>> combinationSum(int[] a, int t){\n        java.util.List<java.util.List<Integer>> res = new java.util.ArrayList<>();\n        backtrack(0, t, a, new java.util.ArrayList<>(), res);\n        return res;\n    }\n    void backtrack(int s, int rem, int[] a, java.util.List<Integer> p, java.util.List<java.util.List<Integer>> res){\n        if(rem == 0){ res.add(new java.util.ArrayList<>(p)); return; }\n        if(rem < 0) return;\n        for(int i=s; i<a.length; i++){\n            p.add(a[i]);\n            backtrack(i+1, rem-a[i], a, p, res);\n            p.remove(p.size()-1);\n        }\n    }\n}`
+                code: `import java.util.*;\n\nclass Main {\n    static int dfs(int[] nums,int start,int rem){\n        if(rem==0) return 1;\n        if(rem<0) return 0;\n        int count=0;\n        for(int i=start;i<nums.length;i++)\n            count+=dfs(nums,i+1,rem-nums[i]);\n        return count;\n    }\n    public static void main(String[] args){\n        int[] arr={2,3,6,7};\n        System.out.println(dfs(arr,0,7));\n    }\n}`
             },
             {
                 title: "Median of Two Arrays",
                 desc: "Find the median of two sorted arrays.",
-                code: `class Median{\n    public double findMedianSortedArrays(int[] A, int[] B){\n        int[] nums = new int[A.length + B.length];\n        System.arraycopy(A, 0, nums, 0, A.length);\n        System.arraycopy(B, 0, nums, A.length, B.length);\n        java.util.Arrays.sort(nums);\n        int n = nums.length;\n        if(n % 2 == 1) return nums[n/2];\n        return (nums[n/2-1] + nums[n/2]) / 2.0;\n    }\n}`
+                code: `class Main {\n    static int search(int[] arr,int target){\n        int l=0,r=arr.length-1;\n        while(l<=r){\n            int mid=(l+r)/2;\n            if(arr[mid]==target) return mid;\n            else if(arr[mid]<target) r=mid-1;\n            else l=mid+1;\n        }\n        return -1;\n    }\n    public static void main(String[] args){\n        int[] arr={1,3,5,7,9};\n        System.out.println(search(arr,7));\n    }\n}`
             }
         ],
         cpp: [
             {
                 title: "Roman to Integer",
                 desc: "Convert Roman numeral string to an integer.",
-                code: `class Solution{\npublic:\n    int romanToInt(string s){\n        unordered_map<char,int> m = {{'I',1},{'V',5},{'X',10},{'L',50},{'C',100},{'D',500},{'M',1000}};\n        int total = 0;\n        for(int i=0; i<s.size(); i++){\n            if(i+1 < s.size() && m[s[i]] < m[s[i+1]])\n                total -= m[s[i]];\n            else total += m[s[i]];\n        }\n        return total;\n    }\n};`
+                code: `#include <bits/stdc++.h>\nusing namespace std;\n\nint romanToInt(string s){\n    unordered_map<char,int> r={{'I',1},{'V',5},{'X',10},{'L',50},{'C',100},{'D',500},{'M',1000}};\n    int total=0;\n    for(int i=0;i<s.size();i++){\n        if(i+1<s.size() && r[s[i]] > r[s[i+1]]) total-=r[s[i]];\n        else total+=r[s[i]];\n    }\n    return total;\n}\n\nint main(){\n    cout<<romanToInt(\"IV\");\n}\n`
             },
             {
                 title: "Combination Sum",
                 desc: "Return combinations that sum up to target.",
-                code: `class Solution{\npublic:\n    vector<vector<int>> combinationSum(vector<int>& c, int t){\n        vector<vector<int>> res;\n        vector<int> p;\n        backtrack(0, t, c, p, res);\n        return res;\n    }\n    void backtrack(int s, int rem, vector<int>& c, vector<int>& p, vector<vector<int>>& res){\n        if(rem == 0){ res.push_back(p); return; }\n        if(rem < 0) return;\n        for(int i=s; i<c.size(); i++){\n            p.push_back(c[i]);\n            backtrack(i+1, rem-c[i], c, p, res);\n            p.pop_back();\n        }\n    }\n};`
+                code: `#include <bits/stdc++.h>\nusing namespace std;\n\nint combinationSum(vector<int>& nums,int target){\n    int count=0;\n    function<void(int,int)> dfs=[&](int start,int rem){\n        if(rem==0){count++;return;}\n        if(rem<0)return;\n        for(int i=start;i<nums.size();i++) dfs(i+1,rem-nums[i]);\n    };\n    dfs(0,target);\n    return count;\n}\n\nint main(){\n    vector<int> v={2,3,6,7};\n    cout<<combinationSum(v,7);\n}\n`
             },
             {
                 title: "Median of Two Arrays",
                 desc: "Find the median of two sorted arrays.",
-                code: `class Median{\npublic:\n    double findMedianSortedArrays(vector<int>& A, vector<int>& B){\n        A.insert(A.end(), B.begin(), B.end());\n        sort(A.begin(), A.end());\n        int n = A.size();\n        if(n % 2) return A[n/2];\n        return (A[n/2-1] + A[n/2]) / 2.0;\n    }\n};`
+                code: `#include <bits/stdc++.h>\nusing namespace std;\n\nint search(vector<int>& arr,int target){\n    int l=0,r=arr.size()-1;\n    while(l<=r){\n        int mid=(l+r)/2;\n        if(arr[mid]==target) return mid;\n        else if(arr[mid]<target) r=mid-1;\n        else l=mid+1;\n    }\n    return -1;\n}\n\nint main(){\n    vector<int>a={1,3,5,7,9};\n    cout<<search(a,7);\n}\n
+`
             }
         ]
     };
