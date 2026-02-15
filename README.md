@@ -100,3 +100,85 @@ No heavy backend required.
 
 ## 🧠 Event Flow
 
+Signup
+↓
+Choose Language
+↓
+Debug Problems
+↓
+Run Code
+↓
+Submit Output
+↓
+Results Stored
+↓
+End Screen
+
+
+---
+
+## 📦 Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+Frontend | HTML, CSS, JavaScript |
+Editor | Monaco Editor |
+Execution | Online compiler API |
+Backend | Google Apps Script |
+Storage | Google Sheets |
+Hosting | Vercel |
+
+---
+
+## 🎯 Intended Use
+
+This platform is ideal for:
+
+- College coding events
+- Debugging competitions
+- Hackathons
+- Technical club contests
+- Programming workshops
+
+---
+
+## ⚙️ Deployment
+
+The project can be deployed using:
+
+- Vercel
+- Netlify
+- GitHub Pages
+- Any static hosting
+
+No server configuration required.
+
+---
+
+## 📈 Future Improvements
+
+Possible upgrades:
+
+- Auto scoring & ranking
+- Admin dashboard
+- Leaderboard
+- Timer synchronization
+- Problem randomization
+- AI-assisted evaluation
+
+---
+
+## 👨‍💻 Developed For
+
+Debugging competitions focused on improving:
+
+- Logical reasoning
+- Code analysis skills
+- Bug fixing ability
+- Programming confidence
+
+---
+
+## 📄 License
+
+This project is open for educational and event use.
