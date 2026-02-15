@@ -22,8 +22,22 @@
 body {
     background-color: var(--bg-dark);
     color: var(--text-light);
+    height: 100vh;
+    overflow: hidden;
+    /* Global scroll disable */
+}
+
+/* Remove redundant instructions override if it exists */
+body.instructions-page {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Enable scrolling for Editor page specifically */
+body.editor-page {
+    overflow-y: auto;
+    height: auto;
     min-height: 100vh;
-    overflow-x: hidden;
 }
 
 /* Matrix Background Effect */
@@ -46,8 +60,9 @@ body {
 /* Branding */
 .branding-top {
     text-align: center;
-    padding-top: 3rem;
-    margin-bottom: 2rem;
+    padding-top: 2rem;
+    /* Reduced padding */
+    margin-bottom: 0;
 }
 
 .branding-top {
@@ -57,7 +72,8 @@ body {
 }
 
 .event-logo-large {
-    width: 420px;
+    width: 320px;
+    /* Reduced from 420px */
     /* Adjust size here */
     max-width: 80vw;
     /* Responsive scaling */
@@ -135,7 +151,7 @@ body {
 
 .card h2 {
     text-align: center;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
     font-size: 2.5rem;
     font-weight: 800;
     letter-spacing: 0.05em;
@@ -280,34 +296,43 @@ body {
     border-radius: 1.5rem;
     color: var(--text-dark);
     overflow: hidden;
-    max-width: 1200px;
-    /* Increased for side-by-side */
-    margin: 0 auto;
+    max-width: 1500px;
+    margin: 1rem 2rem;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    display: grid;
+    grid-template-areas:
+        "problem editor output"
+        "problem controls controls";
+    grid-template-columns: 350px 1.2fr 0.8fr;
+    grid-template-rows: 1fr auto;
+}
+
+/* Dark theme for Editor Page Panel */
+body.editor-page .panel {
+    background: #111827;
+    color: white;
 }
 
 .editor-wrapper {
-    display: flex;
-    height: 70vh;
-    /* Increased slightly for better view */
-    width: 100%;
-    background: #111827;
-    border-radius: 1rem 1rem 0 0;
-    overflow: hidden;
+    grid-area: editor;
+    display: contents;
 }
 
 .problem-panel {
-    width: 35%;
-    padding: 2rem;
+    grid-area: problem;
+    padding: 2.5rem;
     background: #111827;
     color: white;
     overflow-y: auto;
     border-right: 1px solid #374151;
+    display: flex;
+    flex-direction: column;
+    min-height: 75vh;
 }
 
 .problem-panel h2 {
     color: var(--accent);
-    margin: 1.5rem 0 1rem;
+    margin-bottom: 0.5rem;
     font-size: 1.8rem;
     font-weight: 800;
 }
@@ -316,10 +341,19 @@ body {
     color: #d1d5db;
     line-height: 1.6;
     font-size: 1rem;
+    margin-bottom: 2rem;
 }
 
 .problem-list-container {
+    margin-top: 1.5rem;
     margin-bottom: 2rem;
+}
+
+.problem-list-container h3 {
+    margin-bottom: 1rem;
+    color: #9ca3af;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
 }
 
 .problem-list {
@@ -366,9 +400,11 @@ body {
 }
 
 .editor-panel {
-    width: 65%;
-    height: 100%;
+    grid-area: editor;
+    height: 75vh;
+    /* Consistent height across panels */
     background: #1e1e1e;
+    border-right: 1px solid #374151;
 }
 
 #editorContainer {
@@ -377,9 +413,11 @@ body {
 }
 
 .editor-controls {
+    grid-area: controls;
     text-align: center;
-    padding: 1.5rem 0;
+    padding: 2rem 0;
     background: #111827;
+    border-top: 1px solid #374151;
 }
 
 .editor-controls button {
@@ -405,8 +443,14 @@ body {
 }
 
 .output-section {
+    grid-area: output;
     padding: 2rem;
     background: #000;
+    height: 75vh;
+    /* Match editor-panel height */
+    display: flex;
+    flex-direction: column;
+    border-left: 1px solid #374151;
 }
 
 .output-section h3 {
@@ -417,11 +461,10 @@ body {
 }
 
 .output-section textarea {
+    flex-grow: 1;
     width: 100%;
-    height: 150px;
     background: black;
     color: #00ff41;
-    /* Matrix green */
     padding: 1.25rem;
     font-family: 'JetBrains Mono', monospace;
     font-size: 14px;
@@ -453,18 +496,25 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 80vh;
-    padding: 2rem;
+    flex-grow: 1;
+    /* Take up remaining height */
+    padding: 1rem;
+    overflow: hidden;
 }
 
 .rules-card {
-    max-width: 700px;
-    width: 100%;
+    max-width: 900px;
+    width: 95%;
+    max-height: 80vh;
+    /* Reduced slightly to give more room */
     background: rgba(17, 24, 39, 0.95);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 1.5rem;
-    padding: 3rem;
-    text-align: center;
+    border-radius: 1rem;
+    /* Softened (less round than 1.5rem, but not sharp) */
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.7);
 }
 
 .rules-card h2 {
@@ -475,13 +525,22 @@ body {
 }
 
 .rules-content {
-    margin: 2rem 0;
+    margin: 1.5rem 0;
+    overflow-y: auto;
+    /* Hide scrollbar but allow functionality if needed */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.rules-content::-webkit-scrollbar {
+    display: none;
 }
 
 .rule-item {
     display: flex;
-    align-items: flex-start;
-    margin-bottom: 2rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    text-align: left;
 }
 
 .rule-icon {
@@ -500,16 +559,23 @@ body {
 
 .rule-text p {
     color: #9ca3af;
-    line-height: 1.6;
+    line-height: 1.4;
+    font-size: 0.95rem;
 }
 
 .acknowledgement-footer {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding-top: 2rem;
+    padding-top: 1.5rem;
+    margin-top: auto;
+    /* Push to bottom of card if flex */
+}
+
+.footer-controls {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.5rem;
+    gap: 1.25rem;
+    width: 100%;
 }
 
 /* Custom Checkbox */
