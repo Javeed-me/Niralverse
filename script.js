@@ -208,7 +208,7 @@ const App = (() => {
                         currentIdx: 0,
                         finished: false
                     });
-                    window.location.href = "language.html";
+                    window.location.href = "language.html"; // First jump uses href
                 } else {
                     showModal(response.message || "Registration failed.", "SIGNUP ERROR");
                     btn.disabled = false;
@@ -244,7 +244,7 @@ const App = (() => {
                         language: lang
                     });
                 }
-                window.location.href = "instructions.html";
+                window.location.replace("instructions.html"); // Use replace to hide language.html
             };
         });
     }
@@ -259,7 +259,7 @@ const App = (() => {
             });
 
             btn.onclick = () => {
-                window.location.href = "editor.html";
+                window.location.replace("editor.html"); // Use replace to hide instructions.html
             };
         }
     }
@@ -330,7 +330,7 @@ const App = (() => {
             showLoading(false);
 
             showModal(`Violations breached. Auto-submitting. Reason: ${reason}`, "SESSION TERMINATED", () => {
-                window.location.href = "end.html";
+                window.location.replace("end.html"); // Use replace
             }, true, "OK");
         }
 
@@ -507,7 +507,7 @@ const App = (() => {
                 showLoading(false);
 
                 if (state.completed.every(c => c)) {
-                    window.location.href = "end.html";
+                    window.location.replace("end.html"); // Use replace
                 } else {
                     const next = state.completed.findIndex(c => !c);
                     loadProblem(next !== -1 ? next : currentIdx);
@@ -527,23 +527,34 @@ const App = (() => {
         // Hide loader by default on every page load
         showLoading(false);
 
-        // 1. STRICT REDIRECTION: If finished, only allow end page or signup
+        // 1. Navigation Locking (Global)
+        if (!isSignupPage) {
+            // Push state twice to ensure we have a history entry to go back to that we control
+            if (!history.state || history.state.bh_locked !== true) {
+                history.pushState({ bh_locked: true }, null, location.href);
+            }
+            window.onpopstate = (event) => {
+                history.pushState({ bh_locked: true }, null, location.href);
+                if (!isEndPage) {
+                    showModal("Back navigation is disabled during the contest.", "NAVIGATION LOCKED");
+                }
+            };
+        }
+
+        // 2. STRICT REDIRECTION: If finished, only allow end page or signup
         if (state.finished && !isEndPage && !isSignupPage) {
             window.location.replace("end.html");
             return;
         }
 
-        // 2. Initial signup setup
+        // 3. Initial signup setup
         if (isSignupPage) {
-            // Only clear if we are NOT already finished, or if we want to allow re-signup
-            // The user said "it should strictly considered as i can manipulate answers... after submitting and backtracking"
-            // So we allow signup to override 'finished' if they explicitly go to signup.html
             sessionStorage.clear();
             initSignup();
-            return; // Don't run other inits on signup page
+            return;
         }
 
-        // 3. Regular Page Inits
+        // 4. Regular Page Inits
         if (document.querySelector('.lang-tile')) initLanguage();
         if (document.querySelector('.instructions-page')) initInstructions();
         if (document.getElementById('editorContainer')) {
@@ -552,6 +563,13 @@ const App = (() => {
         }
         if (isEndPage) initEnd();
     };
+
+    // BFCache Protection: Force reload/re-check if restored from cache
+    window.addEventListener('pageshow', (event) => {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', start);
