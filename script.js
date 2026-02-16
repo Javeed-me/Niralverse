@@ -300,7 +300,7 @@ const App = (() => {
         const elapsed = TOTAL_TIME - s;
         const m = Math.floor(elapsed / 60);
         const sec = elapsed % 60;
-        return `${m} mins ${sec}s`;
+        return `${m}.${String(sec).padStart(2, '0')}`;
     };
 
     function initSecurity() {
