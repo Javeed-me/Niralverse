@@ -46,6 +46,10 @@ function doPost(e) {
       }
 
       var updates = 0;
+      // Refresh Submission Timestamp (Column 1)
+      sheet.getRange(rowIdx, 1).setValue(new Date());
+      updates++;
+
       // Update Language
       if (data.language) {
         sheet.getRange(rowIdx, 6).setValue(data.language.toUpperCase());

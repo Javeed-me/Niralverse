@@ -11,6 +11,8 @@ const App = (() => {
         java: 62
     };
 
+    let isTerminating = false; // Shared flag to bypass navigation warnings
+
     /* ==============================
        SESSION HELPERS
     ============================== */
@@ -298,7 +300,7 @@ const App = (() => {
         const elapsed = TOTAL_TIME - s;
         const m = Math.floor(elapsed / 60);
         const sec = elapsed % 60;
-        return `${m} mins ${sec} secs`;
+        return `${m} mins ${sec}s`;
     };
 
     function initSecurity() {
@@ -309,8 +311,6 @@ const App = (() => {
         const timerEl = document.getElementById('timerValue');
         const violationEl = document.getElementById('violationCount');
         if (violationEl) violationEl.innerText = violations;
-
-        let isTerminating = false;
 
         if (timerEl) timerEl.innerText = formatTime(sharedTimeLeft);
 
@@ -352,6 +352,8 @@ const App = (() => {
             showLoading(false);
 
             showModal(`Violations breached. Auto-submitting. Reason: ${reason}`, "SESSION TERMINATED", () => {
+                isTerminating = true;
+                saveSession({ finished: true });
                 window.location.replace("end.html"); // Use replace
             }, true, "OK");
         }
@@ -532,6 +534,8 @@ const App = (() => {
                 showLoading(false);
 
                 if (state.completed.every(c => c)) {
+                    isTerminating = true;
+                    saveSession({ finished: true });
                     window.location.replace("end.html"); // Use replace
                 } else {
                     const next = state.completed.findIndex(c => !c);
