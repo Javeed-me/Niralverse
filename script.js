@@ -2,7 +2,7 @@ const App = (() => {
     /* ==============================
        CONFIG
     ============================== */
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwe-iNZjmDrSyjNsS1TOKmCj8PMY6O7_OA_JSuIMygJwWWFeHOs2PT8N_2lR41lZJod9g/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzPNFRsT06MpOiH3_qreP4EkNz9Qc_-gM6VwMRj0QSojM9mSKnQKo5vT4CgyL5fkmQHSg/exec';
     const JUDGE0_URL = 'https://ce.judge0.com/submissions/?base64_encoded=false&wait=true';
 
     const JUDGE0_LANG_MAP = {
@@ -298,9 +298,10 @@ const App = (() => {
 
     const getElapsedTimeString = (s) => {
         const elapsed = TOTAL_TIME - s;
-        const m = Math.floor(elapsed / 60);
-        const sec = elapsed % 60;
-        return `${m}.${String(sec).padStart(2, '0')}`;
+        const hh = Math.floor(elapsed / 3600);
+        const mm = Math.floor((elapsed % 3600) / 60);
+        const ss = elapsed % 60;
+        return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`;
     };
 
     function initSecurity() {
@@ -346,7 +347,9 @@ const App = (() => {
                     gmail: session.user.gmail,
                     language: session.selectedLanguage,
                     results: session.results,
-                    timeTaken: getElapsedTimeString(sharedTimeLeft)
+                    timeTaken: getElapsedTimeString(sharedTimeLeft),
+                    remainingTime: formatTime(sharedTimeLeft),
+                    totalDuration: "01:00:00"
                 });
             }
             showLoading(false);
@@ -517,13 +520,17 @@ const App = (() => {
                 saveSession(state);
 
                 if (state.user && state.user.gmail) {
+                    const isFinal = state.completed.every(c => c);
                     // Atomic sync of ALL current data
                     const res = await postData({
                         action: 'sync',
                         gmail: state.user.gmail,
                         language: state.selectedLanguage,
                         results: state.results,
-                        timeTaken: getElapsedTimeString(sharedTimeLeft)
+                        timeTaken: getElapsedTimeString(sharedTimeLeft),
+                        remainingTime: formatTime(sharedTimeLeft),
+                        totalDuration: "01:00:00",
+                        isFinal: isFinal
                     });
                     if (!res || res.result !== 'success') {
                         showLoading(false);
