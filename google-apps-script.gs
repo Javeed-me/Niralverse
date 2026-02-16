@@ -2,7 +2,7 @@
  * Bug Hunt Backend - Google Apps Script
  * 
  * Columns: 1:Timestamp, 2:Name, 3:Gmail, 4:Team Name, 5:College Name, 
- *          6:Language Chosen, 7:Problem 1 Answer, 8:Problem 2 Answer, 9:Problem 3 Answer
+ *          6:Language Chosen, 7:Problem 1 Answer, 8:Problem 2 Answer, 9:Problem 3 Answer, 10:Time Taken
  */
 
 function doPost(e) {
@@ -25,7 +25,7 @@ function doPost(e) {
         }
       }
 
-      var rowData = [new Date(), data.name, data.gmail.trim(), data.teamName, data.collegeName, '', '', '', ''];
+      var rowData = [new Date(), data.name, data.gmail.trim(), data.teamName, data.collegeName, '', '', '', '', ''];
       sheet.appendRow(rowData);
       return createJsonResponse({ result: 'success' });
     } 
@@ -60,6 +60,12 @@ function doPost(e) {
             updates++;
           }
         }
+      }
+
+      // Update Time Taken
+      if (data.timeTaken) {
+        sheet.getRange(rowIdx, 10).setValue(data.timeTaken);
+        updates++;
       }
 
       // Backwards compatibility for single answer update

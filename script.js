@@ -3,16 +3,12 @@ const App = (() => {
        CONFIG
     ============================== */
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwe-iNZjmDrSyjNsS1TOKmCj8PMY6O7_OA_JSuIMygJwWWFeHOs2PT8N_2lR41lZJod9g/exec';
+    const JUDGE0_URL = 'https://ce.judge0.com/submissions/?base64_encoded=false&wait=true';
 
-    const PISTON_ENDPOINTS = [
-        'https://emkc.org/api/v2/piston/execute',
-        'https://piston.pujit.org/api/v2/piston/execute'
-    ];
-
-    const PISTON_LANG_MAP = {
-        python: { language: 'python3', version: '3.10.0' },
-        java: { language: 'java', version: '15.0.2' },
-        cpp: { language: 'cpp', version: '10.2.0' }
+    const JUDGE0_LANG_MAP = {
+        python: 71,
+        cpp: 54,
+        java: 62
     };
 
     /* ==============================
@@ -141,29 +137,44 @@ const App = (() => {
     }
 
     async function executeCode(source_code, lang_key) {
-        for (const endpoint of PISTON_ENDPOINTS) {
-            try {
-                const config = PISTON_LANG_MAP[lang_key] || { language: lang_key, version: '*' };
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        language: config.language,
-                        version: config.version,
-                        files: [{ content: source_code }]
-                    })
-                });
-                if (!response.ok) continue;
-                const data = await response.json();
-                let output = "";
-                if (data.compile && data.compile.stderr) output += "--- COMPILATION ERROR ---\n" + data.compile.stderr;
-                if (data.run) output += (output ? "\n" : "") + data.run.output;
-                return output || 'Execution completed with no output.';
-            } catch (error) {
-                console.warn(`Mirror ${endpoint} failed:`, error);
+        try {
+            const lang_id = JUDGE0_LANG_MAP[lang_key] || 71;
+            const response = await fetch(JUDGE0_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    source_code: source_code,
+                    language_id: lang_id,
+                    stdin: ""
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Judge0 API Error: ${response.status}`);
             }
+
+            const data = await response.json();
+
+            // Interpret Judge0 Status
+            // Status ID 3 is "Accepted"
+            let output = "";
+            if (data.stdout) output += data.stdout;
+            if (data.compile_output) output += (output ? "\n" : "") + "--- COMPILE ERROR ---\n" + data.compile_output;
+            if (data.stderr) output += (output ? "\n" : "") + "--- RUNTIME ERROR ---\n" + data.stderr;
+
+            if (!output) {
+                if (data.status && data.status.id !== 3) {
+                    output = `Execution Status: ${data.status.description}`;
+                } else {
+                    output = "Execution completed with no output.";
+                }
+            }
+
+            return output;
+        } catch (error) {
+            console.error("Judge0 Execution Failed:", error);
+            return "Connection Error: Failed to reach Judge0 servers. Check internet.";
         }
-        return "Connection Error: Failed to reach execution servers. Check internet.";
     }
 
     /* ==============================
@@ -273,10 +284,27 @@ const App = (() => {
         };
     }
 
+    let sharedTimeLeft = 3600; // Shared state for timer
+    const TOTAL_TIME = 3600;
+
+    const formatTime = (s) => {
+        const h = Math.floor(s / 3600);
+        const m = Math.floor((s % 3600) / 60);
+        const sec = s % 60;
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+    };
+
+    const getElapsedTimeString = (s) => {
+        const elapsed = TOTAL_TIME - s;
+        const m = Math.floor(elapsed / 60);
+        const sec = elapsed % 60;
+        return `${m} mins ${sec} secs`;
+    };
+
     function initSecurity() {
         const state = getSession();
         let violations = state.violations || 0;
-        let timeLeft = (state.timeLeft !== undefined && state.timeLeft !== null) ? state.timeLeft : 3600;
+        sharedTimeLeft = (state.timeLeft !== undefined && state.timeLeft !== null) ? state.timeLeft : TOTAL_TIME;
 
         const timerEl = document.getElementById('timerValue');
         const violationEl = document.getElementById('violationCount');
@@ -284,14 +312,7 @@ const App = (() => {
 
         let isTerminating = false;
 
-        const formatTime = (s) => {
-            const h = Math.floor(s / 3600);
-            const m = Math.floor((s % 3600) / 60);
-            const sec = s % 60;
-            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
-        };
-
-        if (timerEl) timerEl.innerText = formatTime(timeLeft);
+        if (timerEl) timerEl.innerText = formatTime(sharedTimeLeft);
 
         // Navigation Locking
         // Ensure we have an initial state to push against
@@ -324,7 +345,8 @@ const App = (() => {
                     action: 'sync',
                     gmail: session.user.gmail,
                     language: session.selectedLanguage,
-                    results: session.results
+                    results: session.results,
+                    timeTaken: getElapsedTimeString(sharedTimeLeft)
                 });
             }
             showLoading(false);
@@ -335,14 +357,14 @@ const App = (() => {
         }
 
         const timerInterval = setInterval(() => {
-            if (timeLeft <= 0) {
+            if (sharedTimeLeft <= 0) {
                 clearInterval(timerInterval);
                 autoSubmitAll("Time's Up!");
                 return;
             }
-            timeLeft--;
-            if (timerEl) timerEl.innerText = formatTime(timeLeft);
-            if (timeLeft % 5 === 0) saveSession({ timeLeft });
+            sharedTimeLeft--;
+            if (timerEl) timerEl.innerText = formatTime(sharedTimeLeft);
+            if (sharedTimeLeft % 5 === 0) saveSession({ timeLeft: sharedTimeLeft });
         }, 1000);
 
         let lastViolationTime = 0;
@@ -470,8 +492,10 @@ const App = (() => {
                 const out = document.getElementById("answer");
                 btn.disabled = true;
                 btn.innerText = "RUNNING...";
-                out.value = "Executing...";
+                out.value = ""; // Clear output box before execution
+                out.placeholder = "Executing...";
                 out.value = await executeCode(window.editor.getValue(), lang);
+                out.placeholder = "Run result will appear here...";
                 btn.disabled = false;
                 btn.innerText = "Run";
             };
@@ -496,7 +520,8 @@ const App = (() => {
                         action: 'sync',
                         gmail: state.user.gmail,
                         language: state.selectedLanguage,
-                        results: state.results
+                        results: state.results,
+                        timeTaken: getElapsedTimeString(sharedTimeLeft)
                     });
                     if (!res || res.result !== 'success') {
                         showLoading(false);
